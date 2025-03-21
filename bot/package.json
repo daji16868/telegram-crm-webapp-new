@@ -1,0 +1,16 @@
+{
+  "name": "telegram-crm-bot",
+  "version": "1.0.0",
+  "description": "简单的Telegram机器人，仅提供CRM WebApp入口",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.63.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
