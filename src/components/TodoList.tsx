@@ -1,384 +1,292 @@
-import React, { useState, useEffect } from 'react';
-import { Todo } from '../types/todo';
+import React, { useState, useMemo } from 'react';
+import { Todo } from '../types';
 
 interface TodoListProps {
-  initialTodos?: Todo[];
+  todos: Todo[];
+  onAddTodo: () => void;
+  onToggleTodo: (todo: Todo) => void;
+  onEditTodo: (todo: Todo) => void;
+  onDeleteTodo: (id: string) => void;
+  categories?: string[];
 }
 
-export const TodoList: React.FC<TodoListProps> = ({ initialTodos = [] }) => {
-  const [todos, setTodos] = useState<Todo[]>(initialTodos);
-  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [isAddingTodo, setIsAddingTodo] = useState(false);
-  const [newTodoTitle, setNewTodoTitle] = useState('');
-  const [newTodoDescription, setNewTodoDescription] = useState('');
-  const [newTodoDueDate, setNewTodoDueDate] = useState('');
-  const [newTodoPriority, setNewTodoPriority] = useState<'high' | 'medium' | 'low'>('medium');
-  const [newTodoCategory, setNewTodoCategory] = useState('工作');
+const TodoList: React.FC<TodoListProps> = ({
+  todos,
+  onAddTodo,
+  onToggleTodo,
+  onEditTodo,
+  onDeleteTodo,
+  categories = []
+}) => {
+  const [filterCompleted, setFilterCompleted] = useState<boolean | null>(false);
+  const [filterPriority, setFilterPriority] = useState<string>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'dueDate' | 'priority' | 'createdAt'>('dueDate');
 
-  // 初始化示例待办事项数据
-  useEffect(() => {
-    if (todos.length === 0) {
-      const defaultTodos: Todo[] = [
-        {
-          id: '1',
-          title: '联系新客户',
-          description: '联系王先生了解需求',
-          completed: false,
-          priority: 'high',
-          category: '工作',
-          dueDate: '2023-04-01',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '2',
-          title: '准备销售报告',
-          description: '完成本月销售数据报告',
-          completed: false,
-          priority: 'medium',
-          category: '工作',
-          dueDate: '2023-04-05',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '3',
-          title: '更新客户资料',
-          description: '更新客户联系方式和偏好',
-          completed: true,
-          priority: 'low',
-          category: '工作',
-          dueDate: '2023-03-28',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '4',
-          title: '预约售后服务',
-          description: '为李先生预约上门服务',
-          completed: false,
-          priority: 'medium',
-          category: '服务',
-          dueDate: '2023-04-02',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: '5',
-          title: '团队会议',
-          description: '讨论本周销售策略',
-          completed: false,
-          priority: 'high',
-          category: '会议',
-          dueDate: '2023-03-31',
-          createdAt: new Date().toISOString()
-        }
-      ];
-      setTodos(defaultTodos);
+  // 提取所有类别
+  const allCategories = useMemo(() => {
+    const uniqueCategories = new Set<string>();
+    
+    todos.forEach(todo => {
+      if (todo.category) {
+        uniqueCategories.add(todo.category);
+      }
+    });
+    
+    // 如果有传入预定义的类别，也添加到集合中
+    categories.forEach(category => {
+      uniqueCategories.add(category);
+    });
+    
+    return Array.from(uniqueCategories).sort();
+  }, [todos, categories]);
+
+  // 过滤和排序待办事项
+  const filteredTodos = useMemo(() => {
+    // 过滤
+    let result = todos.filter(todo => {
+      // 按完成状态过滤
+      if (filterCompleted !== null && todo.completed !== filterCompleted) {
+        return false;
+      }
+      
+      // 按优先级过滤
+      if (filterPriority !== 'all' && todo.priority !== filterPriority) {
+        return false;
+      }
+      
+      // 按类别过滤
+      if (filterCategory !== 'all' && todo.category !== filterCategory) {
+        return false;
+      }
+      
+      return true;
+    });
+    
+    // 排序
+    result = [...result].sort((a, b) => {
+      if (sortBy === 'dueDate') {
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      } else if (sortBy === 'priority') {
+        const priorityMap: Record<string, number> = {
+          'high': 0,
+          'medium': 1,
+          'low': 2
+        };
+        return priorityMap[a.priority] - priorityMap[b.priority];
+      } else {
+        // createdAt
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+    
+    return result;
+  }, [todos, filterCompleted, filterPriority, filterCategory, sortBy]);
+
+  // 获取待办事项数量统计
+  const todoStats = useMemo(() => {
+    const completed = todos.filter(todo => todo.completed).length;
+    const pending = todos.length - completed;
+    
+    return { total: todos.length, completed, pending };
+  }, [todos]);
+  
+  // 优先级标签显示
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'high': return '高';
+      case 'medium': return '中';
+      case 'low': return '低';
+      default: return priority;
     }
-  }, [todos.length]);
-
-  // 获取所有分类
-  const categories = ['all', ...new Set(todos.map(todo => todo.category))];
-
-  // 切换待办事项完成状态
-  const toggleTodoCompletion = (todoId: string) => {
-    setTodos(
-      todos.map(todo =>
-        todo.id === todoId ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
   };
-
-  // 添加新待办事项
-  const addTodo = () => {
-    if (newTodoTitle.trim() === '') return;
-
-    const newTodo: Todo = {
-      id: Date.now().toString(),
-      title: newTodoTitle,
-      description: newTodoDescription,
-      completed: false,
-      priority: newTodoPriority,
-      category: newTodoCategory,
-      dueDate: newTodoDueDate || undefined,
-      createdAt: new Date().toISOString()
-    };
-
-    setTodos([...todos, newTodo]);
-    resetNewTodoForm();
-    setIsAddingTodo(false);
+  
+  // 优先级类名
+  const getPriorityClass = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'low': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
-
-  // 重置新待办事项表单
-  const resetNewTodoForm = () => {
-    setNewTodoTitle('');
-    setNewTodoDescription('');
-    setNewTodoDueDate('');
-    setNewTodoPriority('medium');
-    setNewTodoCategory('工作');
+  
+  // 格式化日期
+  const formatDate = (date: Date) => {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('zh-CN');
   };
-
-  // 删除待办事项
-  const deleteTodo = (todoId: string) => {
-    setTodos(todos.filter(todo => todo.id !== todoId));
+  
+  // 检查待办是否过期
+  const isOverdue = (dueDate: Date, completed: boolean) => {
+    if (completed) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return new Date(dueDate) < today;
   };
-
-  // 根据过滤条件筛选待办事项
-  const getFilteredTodos = () => {
-    return todos
-      .filter(todo => {
-        if (filter === 'active') return !todo.completed;
-        if (filter === 'completed') return todo.completed;
-        return true;
-      })
-      .filter(todo => {
-        if (categoryFilter === 'all') return true;
-        return todo.category === categoryFilter;
-      })
-      .sort((a, b) => {
-        // 先按到期日期排序
-        if (a.dueDate && b.dueDate) {
-          if (a.dueDate < b.dueDate) return -1;
-          if (a.dueDate > b.dueDate) return 1;
-        } else if (a.dueDate) {
-          return -1;
-        } else if (b.dueDate) {
-          return 1;
-        }
-        
-        // 如果到期日期相同或都为空，则按优先级排序
-        const priorityOrder = { high: 0, medium: 1, low: 2 };
-        return priorityOrder[a.priority] - priorityOrder[b.priority];
-      });
-  };
-
-  const filteredTodos = getFilteredTodos();
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 mb-20">
+    <div className="bg-white rounded-lg shadow p-4">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">待办事项</h2>
-        {!isAddingTodo && (
+        <div className="flex space-x-2">
+          <span className="text-sm text-gray-500">{todoStats.pending} 待办 / {todoStats.completed} 已完成</span>
           <button
-            className="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm"
-            onClick={() => setIsAddingTodo(true)}
+            onClick={onAddTodo}
+            className="p-1 rounded-full bg-indigo-500 text-white"
           >
-            添加待办
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
           </button>
-        )}
+        </div>
       </div>
       
-      {/* 添加待办事项表单 */}
-      {isAddingTodo && (
-        <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              标题
-            </label>
-            <input
-              type="text"
-              value={newTodoTitle}
-              onChange={(e) => setNewTodoTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="输入待办事项标题"
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              描述 (可选)
-            </label>
-            <textarea
-              value={newTodoDescription}
-              onChange={(e) => setNewTodoDescription(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="输入待办事项描述"
-              rows={2}
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                截止日期 (可选)
-              </label>
-              <input
-                type="date"
-                value={newTodoDueDate}
-                onChange={(e) => setNewTodoDueDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                优先级
-              </label>
-              <select
-                value={newTodoPriority}
-                onChange={(e) => setNewTodoPriority(e.target.value as 'high' | 'medium' | 'low')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="high">高</option>
-                <option value="medium">中</option>
-                <option value="low">低</option>
-              </select>
-            </div>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              分类
-            </label>
-            <input
-              type="text"
-              value={newTodoCategory}
-              onChange={(e) => setNewTodoCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="输入分类"
-            />
-          </div>
-          
-          <div className="flex justify-end space-x-2">
-            <button
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700"
-              onClick={() => {
-                resetNewTodoForm();
-                setIsAddingTodo(false);
-              }}
-            >
-              取消
-            </button>
-            <button
-              className="px-4 py-2 bg-blue-500 text-white rounded-md"
-              onClick={addTodo}
-              disabled={!newTodoTitle.trim()}
-            >
-              保存
-            </button>
-          </div>
-        </div>
-      )}
-      
-      {/* 筛选器 */}
-      <div className="mb-4 flex flex-col space-y-3">
-        <div className="flex space-x-2 overflow-x-auto pb-2">
-          <button
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              filter === 'all' 
-                ? 'bg-blue-100 text-blue-800' 
-                : 'bg-gray-100 text-gray-800'
-            }`}
-            onClick={() => setFilter('all')}
+      {/* 过滤和排序选项 */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex-1 min-w-[100px]">
+          <select
+            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md"
+            value={filterCompleted === null ? 'all' : filterCompleted ? 'completed' : 'pending'}
+            onChange={(e) => {
+              const val = e.target.value;
+              setFilterCompleted(
+                val === 'all' ? null : val === 'completed'
+              );
+            }}
           >
-            全部
-          </button>
-          <button
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              filter === 'active' 
-                ? 'bg-blue-100 text-blue-800' 
-                : 'bg-gray-100 text-gray-800'
-            }`}
-            onClick={() => setFilter('active')}
-          >
-            未完成
-          </button>
-          <button
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              filter === 'completed' 
-                ? 'bg-blue-100 text-blue-800' 
-                : 'bg-gray-100 text-gray-800'
-            }`}
-            onClick={() => setFilter('completed')}
-          >
-            已完成
-          </button>
+            <option value="all">所有状态</option>
+            <option value="pending">待完成</option>
+            <option value="completed">已完成</option>
+          </select>
         </div>
         
-        {categories.length > 1 && (
-          <div className="flex space-x-2 overflow-x-auto pb-2">
-            {categories.map(category => (
-              <button
-                key={category}
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  categoryFilter === category 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}
-                onClick={() => setCategoryFilter(category)}
-              >
-                {category === 'all' ? '所有分类' : category}
-              </button>
-            ))}
+        <div className="flex-1 min-w-[100px]">
+          <select
+            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md"
+            value={filterPriority}
+            onChange={(e) => setFilterPriority(e.target.value)}
+          >
+            <option value="all">所有优先级</option>
+            <option value="high">高优先级</option>
+            <option value="medium">中优先级</option>
+            <option value="low">低优先级</option>
+          </select>
+        </div>
+        
+        {allCategories.length > 0 && (
+          <div className="flex-1 min-w-[100px]">
+            <select
+              className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md"
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+            >
+              <option value="all">所有类别</option>
+              {allCategories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
           </div>
         )}
+        
+        <div className="flex-1 min-w-[100px]">
+          <select
+            className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+          >
+            <option value="dueDate">按截止日期</option>
+            <option value="priority">按优先级</option>
+            <option value="createdAt">按创建时间</option>
+          </select>
+        </div>
       </div>
       
       {/* 待办事项列表 */}
-      <div className="space-y-3">
-        {filteredTodos.length > 0 ? (
-          filteredTodos.map(todo => (
-            <div 
-              key={todo.id} 
-              className={`p-3 ${todo.completed ? 'bg-gray-50' : 'bg-white'} border border-gray-200 rounded-lg`}
-            >
-              <div className="flex items-start space-x-3">
-                <input
-                  type="checkbox"
-                  checked={todo.completed}
-                  onChange={() => toggleTodoCompletion(todo.id)}
-                  className="mt-1 h-4 w-4 text-blue-600 rounded border-gray-300"
-                />
+      {filteredTodos.length > 0 ? (
+        <ul className="divide-y divide-gray-200">
+          {filteredTodos.map(todo => (
+            <li key={todo.id} className={`py-4 ${todo.completed ? 'opacity-60' : ''}`}>
+              <div className="flex items-start gap-3">
+                <div>
+                  <input
+                    type="checkbox"
+                    checked={todo.completed}
+                    onChange={() => onToggleTodo(todo)}
+                    className="h-5 w-5 text-indigo-600 border-gray-300 rounded"
+                  />
+                </div>
+                
                 <div className="flex-1">
                   <div className="flex justify-between">
                     <h3 className={`font-medium ${todo.completed ? 'line-through text-gray-500' : ''}`}>
                       {todo.title}
                     </h3>
-                    <button 
-                      className="text-gray-400 hover:text-red-500"
-                      onClick={() => deleteTodo(todo.id)}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
+                    
+                    <div className="flex items-center space-x-2">
+                      <span className={`text-xs px-2 py-1 rounded-full ${getPriorityClass(todo.priority)}`}>
+                        {getPriorityLabel(todo.priority)}
+                      </span>
+                      
+                      <div className="relative group">
+                        <button className="p-1 text-gray-400 hover:text-gray-600">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                          </svg>
+                        </button>
+                        
+                        <div className="hidden group-hover:block absolute right-0 w-32 bg-white shadow-lg rounded-md py-1 z-10">
+                          <button
+                            onClick={() => onEditTodo(todo)}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            编辑
+                          </button>
+                          <button
+                            onClick={() => onDeleteTodo(todo.id)}
+                            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                          >
+                            删除
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
                   {todo.description && (
-                    <p className={`text-sm mt-1 ${todo.completed ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className="mt-1 text-sm text-gray-600">
                       {todo.description}
                     </p>
                   )}
                   
-                  <div className="flex mt-2 space-x-2">
-                    {todo.category && (
-                      <span className="inline-block px-2 py-0.5 text-xs bg-gray-100 text-gray-800 rounded-full">
-                        {todo.category}
-                      </span>
-                    )}
-                    
+                  <div className="mt-2 flex items-center text-xs text-gray-500 space-x-3">
                     {todo.dueDate && (
-                      <span className="inline-block px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
-                        截止: {todo.dueDate}
-                      </span>
+                      <div className={isOverdue(todo.dueDate, todo.completed) ? 'text-red-600 font-medium' : ''}>
+                        <span>截止: {formatDate(todo.dueDate)}</span>
+                        {isOverdue(todo.dueDate, todo.completed) && (
+                          <span className="ml-1">(已过期)</span>
+                        )}
+                      </div>
                     )}
                     
-                    <span className={`inline-block px-2 py-0.5 text-xs rounded-full ${
-                      todo.priority === 'high' ? 'bg-red-100 text-red-800' :
-                      todo.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {todo.priority === 'high' ? '高优先级' : 
-                       todo.priority === 'medium' ? '中优先级' : '低优先级'}
-                    </span>
+                    {todo.category && (
+                      <div className="bg-gray-100 px-2 py-1 rounded">
+                        {todo.category}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-center py-6 text-gray-500">暂无待办事项</p>
-        )}
-      </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="py-8 text-center text-gray-500">
+          没有找到符合条件的待办事项
+        </div>
+      )}
     </div>
   );
 };
+
+export default TodoList;
