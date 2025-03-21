@@ -21,7 +21,6 @@
     "noFallthroughCasesInSwitch": true,
     
     /* Type Checking */
-    "suppressImplicitAnyIndexErrors": true,
     "noImplicitAny": false,
     "allowSyntheticDefaultImports": true
   },
