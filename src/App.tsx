@@ -7,7 +7,7 @@ import Dashboard from './components/Dashboard';
 import TodoList from './components/TodoList';
 import NotificationCenter from './components/NotificationCenter';
 import BottomNavigation, { Page } from './components/BottomNavigation';
-import { initTelegramApp } from './utils/telegram';
+import { initTelegramApp } from './utils/telegramWebApp';
 
 // 示例数据
 const initialCustomers: Customer[] = [
