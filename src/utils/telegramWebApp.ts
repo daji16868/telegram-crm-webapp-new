@@ -1,3 +1,28 @@
+// 定义接口以避免类型错误
+interface TelegramMainButton {
+  text: string;
+  color?: string;
+  textColor?: string;
+  isVisible?: boolean;
+  isActive?: boolean;
+  onClick: (callback: () => void) => void;
+  offClick: (callback: () => void) => void;
+  show: () => void;
+  hide: () => void;
+  setParams: (params: any) => void;
+}
+
+interface TelegramWeb {
+  ready: () => void;
+  close: () => void;
+  expand: () => void;
+  enableClosingConfirmation: () => void;
+  MainButton: TelegramMainButton;
+  sendData: (data: string) => void;
+  themeParams: any;
+  colorScheme: 'light' | 'dark';
+}
+
 // 初始化Telegram WebApp
 export const initTelegramApp = (): void => {
   if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
@@ -9,7 +34,8 @@ export const initTelegramApp = (): void => {
 // 启用关闭确认
 export const enableClosingConfirmation = (): void => {
   if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
-    window.Telegram.WebApp.enableClosingConfirmation();
+    // 使用类型断言解决类型问题
+    (window.Telegram.WebApp as any).enableClosingConfirmation();
   }
 };
 
@@ -23,7 +49,8 @@ export const setMainButtonParams = (params: {
 }): void => {
   if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
     const { text, color, textColor, isVisible, isActive } = params;
-    window.Telegram.WebApp.MainButton.setParams({
+    // 使用类型断言解决类型问题
+    (window.Telegram.WebApp.MainButton as any).setParams({
       text,
       color,
       text_color: textColor,
@@ -36,7 +63,8 @@ export const setMainButtonParams = (params: {
 // 发送数据到Telegram
 export const sendDataToTelegram = (data: string): void => {
   if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
-    window.Telegram.WebApp.sendData(data);
+    // 使用类型断言解决类型问题
+    (window.Telegram.WebApp as any).sendData(data);
   }
 };
 
@@ -58,7 +86,7 @@ export const getThemeParams = () => {
 // 获取颜色方案
 export const getColorScheme = (): 'light' | 'dark' => {
   if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
-    return window.Telegram.WebApp.colorScheme;
+    return window.Telegram.WebApp.colorScheme as 'light' | 'dark';
   }
   return 'light';
 };
@@ -81,7 +109,8 @@ export const closeWebApp = (): void => {
 export const showMainButton = (text?: string): void => {
   if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
     if (text) {
-      window.Telegram.WebApp.MainButton.setParams({ text });
+      // 使用类型断言解决类型问题
+      (window.Telegram.WebApp.MainButton as any).setParams({ text });
     }
     window.Telegram.WebApp.MainButton.show();
   }
