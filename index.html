@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>客户管理系统</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      // 阻止双击缩放
+      document.addEventListener('dblclick', function(event) {
+        event.preventDefault();
+      }, { passive: false });
+      
+      // 阻止双指缩放
+      document.addEventListener('touchmove', function(event) {
+        if (event.touches.length > 1) {
+          event.preventDefault();
+        }
+      }, { passive: false });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
