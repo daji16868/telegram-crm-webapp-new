@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Customer, CustomerFormData, Todo, Notification } from './types';
 import CustomerForm from './components/CustomerForm';
@@ -7,6 +7,7 @@ import Dashboard from './components/Dashboard';
 import TodoList from './components/TodoList';
 import NotificationCenter from './components/NotificationCenter';
 import BottomNavigation, { Page } from './components/BottomNavigation';
+import { initTelegramApp } from './utils/telegram';
 
 // 示例数据
 const initialCustomers: Customer[] = [
@@ -110,10 +111,7 @@ function App() {
 
   // 检查Telegram WebApp是否可用
   useEffect(() => {
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.ready();
-      // 根据需要可以在这里初始化WebApp
-    }
+    initTelegramApp();
   }, []);
   
   // 计算未读通知数量
@@ -207,7 +205,7 @@ function App() {
       // 添加通知
       addNotification({
         title: '待办已完成',
-        message: `"${todo.title}" 已标记为完成`,
+        message: `\"${todo.title}\" 已标记为完成`,
         type: 'success'
       });
     }
@@ -227,7 +225,7 @@ function App() {
     // 添加通知
     addNotification({
       title: '待办已删除',
-      message: `"${todoToDelete.title}" 已从待办列表中删除`,
+      message: `\"${todoToDelete.title}\" 已从待办列表中删除`,
       type: 'info'
     });
   };
