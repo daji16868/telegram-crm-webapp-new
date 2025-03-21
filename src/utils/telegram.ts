@@ -1,80 +1,75 @@
-// Telegram WebApp 类型定义
-export interface TelegramWebApp {
-  ready: () => void;
-  close: () => void;
-  expand: () => void;
-  enableClosingConfirmation: () => void;
-  MainButton: {
-    text: string;
-    color: string;
-    textColor: string;
-    isVisible: boolean;
-    isActive: boolean;
-    isProgressVisible: boolean;
-    show: () => void;
-    hide: () => void;
-    onClick: (callback: () => void) => void;
-    offClick: (callback: () => void) => void;
-    enable: () => void;
-    disable: () => void;
-    showProgress: (leaveActive: boolean) => void;
-    hideProgress: () => void;
-    setParams: (params: {
-      text?: string;
-      color?: string;
-      text_color?: string;
-      is_active?: boolean;
-      is_visible?: boolean;
-    }) => void;
-  };
-  BackButton: {
-    isVisible: boolean;
-    onClick: (callback: () => void) => void;
-    offClick: (callback: () => void) => void;
-    show: () => void;
-    hide: () => void;
-  };
-  HapticFeedback: {
-    impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
-    notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
-    selectionChanged: () => void;
-  };
-  initData: string;
-  initDataUnsafe: object;
-  colorScheme: 'light' | 'dark';
-  themeParams: {
-    bg_color: string;
-    text_color: string;
-    hint_color: string;
-    link_color: string;
-    button_color: string;
-    button_text_color: string;
-  };
-  isExpanded: boolean;
-  viewportHeight: number;
-  viewportStableHeight: number;
-  sendData: (data: string) => void;
-  onEvent: (eventType: string, eventHandler: () => void) => void;
-  offEvent: (eventType: string, eventHandler: () => void) => void;
-}
-
-// 全局类型定义，让TypeScript知道window.Telegram的类型
+// 声明全局Telegram对象类型
 declare global {
   interface Window {
     Telegram: {
-      WebApp: TelegramWebApp;
+      WebApp: {
+        ready: () => void;
+        close: () => void;
+        expand: () => void;
+        enableClosingConfirmation: () => void;
+        MainButton: {
+          text: string;
+          color: string;
+          textColor: string;
+          isVisible: boolean;
+          isActive: boolean;
+          isProgressVisible: boolean;
+          show: () => void;
+          hide: () => void;
+          onClick: (callback: () => void) => void;
+          offClick: (callback: () => void) => void;
+          enable: () => void;
+          disable: () => void;
+          showProgress: (leaveActive: boolean) => void;
+          hideProgress: () => void;
+          setParams: (params: {
+            text?: string;
+            color?: string;
+            text_color?: string;
+            is_active?: boolean;
+            is_visible?: boolean;
+          }) => void;
+        };
+        BackButton: {
+          isVisible: boolean;
+          onClick: (callback: () => void) => void;
+          offClick: (callback: () => void) => void;
+          show: () => void;
+          hide: () => void;
+        };
+        HapticFeedback: {
+          impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
+          notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
+          selectionChanged: () => void;
+        };
+        initData: string;
+        initDataUnsafe: object;
+        colorScheme: 'light' | 'dark';
+        themeParams: {
+          bg_color: string;
+          text_color: string;
+          hint_color: string;
+          link_color: string;
+          button_color: string;
+          button_text_color: string;
+        };
+        isExpanded: boolean;
+        viewportHeight: number;
+        viewportStableHeight: number;
+        sendData: (data: string) => void;
+        onEvent: (eventType: string, eventHandler: () => void) => void;
+        offEvent: (eventType: string, eventHandler: () => void) => void;
+      }
     };
   }
 }
 
 // 初始化Telegram WebApp
-export const initTelegramApp = (): TelegramWebApp | null => {
+export const initTelegramApp = (): void => {
   if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
     // 通知Telegram WebApp准备就绪
     window.Telegram.WebApp.ready();
-    return window.Telegram.WebApp;
   }
-  return null;
 };
 
 // 启用关闭确认
