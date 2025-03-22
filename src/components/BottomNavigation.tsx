@@ -8,8 +8,15 @@ interface BottomNavigationProps {
 }
 
 export const BottomNavigation: React.FC<BottomNavigationProps> = ({ currentPath }) => {
+  const navigate = useNavigate();
+  
   const isActive = (path: string) => {
     return currentPath === path || currentPath.startsWith(path + '/');
+  };
+  
+  const handleAddClick = () => {
+    // 直接跳转到添加客户页面
+    navigate('/customers/add');
   };
 
   return (
@@ -61,28 +68,28 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({ currentPath 
             <span className="text-xs mt-1">客户</span>
           </Link>
 
-          {/* 任务按钮 */}
-          <Link
-            to="/tasks"
-            className={`flex flex-col items-center justify-center ${
-              isActive('/tasks') ? 'text-blue-600' : 'text-gray-500'
-            }`}
+          {/* 添加按钮 - 替换原来的任务按钮 */}
+          <div 
+            onClick={handleAddClick}
+            className="relative flex flex-col items-center justify-center cursor-pointer"
           >
-            <svg 
-              className="w-6 h-6" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-              />
-            </svg>
-            <span className="text-xs mt-1">任务</span>
-          </Link>
+            <div className="absolute -top-5 w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center shadow-lg">
+              <svg 
+                className="w-8 h-8 text-white" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6" 
+                />
+              </svg>
+            </div>
+            <span className="text-xs mt-7 text-blue-600">添加</span>
+          </div>
 
           <Link
             to="/organization"
