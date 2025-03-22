@@ -9,30 +9,24 @@ import { DuplicateCustomerWarning } from '../../components/DuplicateCustomerWarn
 // 客户表单接口
 interface CustomerFormData {
   name: string;
-  company: string;
-  position: string;
   phone: string;
-  wechatId: string; // 添加微信号字段
-  qqId: string; // 添加QQ号字段
-  email: string;
-  status: 'potential' | 'active' | 'signed' | 'inactive';
+  telegramId: string;
+  whatsappId: string;
   source: string;
   notes: string;
+  status: 'followed' | 'undeveloped'; // 修改为已跟进和未开发两种状态
 }
 
 export default function AddCustomerPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<CustomerFormData>({
     name: '',
-    company: '',
-    position: '',
     phone: '',
-    wechatId: '', // 初始化微信号
-    qqId: '', // 初始化QQ号
-    email: '',
-    status: 'potential',
+    telegramId: '',
+    whatsappId: '',
     source: '',
-    notes: ''
+    notes: '',
+    status: 'undeveloped'
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,18 +63,10 @@ export default function AddCustomerPage() {
       newErrors.name = '姓名不能为空';
     }
     
-    if (!formData.company.trim()) {
-      newErrors.company = '公司名称不能为空';
-    }
-    
     if (!formData.phone.trim()) {
       newErrors.phone = '电话不能为空';
-    } else if (!/^\\d{7,15}$/.test(formData.phone.replace(/[-\\s]/g, ''))) {
+    } else if (!/^\d{7,15}$/.test(formData.phone.replace(/[-\s]/g, ''))) {
       newErrors.phone = '请输入有效的电话号码';
-    }
-    
-    if (formData.email && !/\\S+@\\S+\\.\\S+/.test(formData.email)) {
-      newErrors.email = '请输入有效的邮箱地址';
     }
     
     setErrors(newErrors);
@@ -98,11 +84,11 @@ export default function AddCustomerPage() {
         const customerInfo: CustomerInfo = {
           name: formData.name,
           phone: formData.phone,
-          wechatId: formData.wechatId,
-          qqId: formData.qqId,
-          email: formData.email,
-          company: formData.company,
-          position: formData.position,
+          telegramId: formData.telegramId,
+          whatsappId: formData.whatsappId,
+          source: formData.source,
+          notes: formData.notes,
+          status: formData.status,
           addedBy: '当前用户', // 在实际应用中，这应该是从用户上下文获取
           tags: []
         };
@@ -176,7 +162,7 @@ export default function AddCustomerPage() {
             {/* 姓名 */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                姓名 <span className="text-red-500">*</span>
+                客户姓名 <span className="text-red-500">*</span>
               </label>
               <div className="mt-1">
                 <input
@@ -191,45 +177,6 @@ export default function AddCustomerPage() {
                   placeholder="请输入客户姓名"
                 />
                 {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
-              </div>
-            </div>
-            
-            {/* 公司 */}
-            <div>
-              <label htmlFor="company" className="block text-sm font-medium text-gray-700">
-                公司名称 <span className="text-red-500">*</span>
-              </label>
-              <div className="mt-1">
-                <input
-                  type="text"
-                  id="company"
-                  name="company"
-                  value={formData.company}
-                  onChange={handleChange}
-                  className={`block w-full rounded-md shadow-sm ${
-                    errors.company ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-                  } sm:text-sm`}
-                  placeholder="请输入公司名称"
-                />
-                {errors.company && <p className="mt-1 text-xs text-red-500">{errors.company}</p>}
-              </div>
-            </div>
-            
-            {/* 职位 */}
-            <div>
-              <label htmlFor="position" className="block text-sm font-medium text-gray-700">
-                职位
-              </label>
-              <div className="mt-1">
-                <input
-                  type="text"
-                  id="position"
-                  name="position"
-                  value={formData.position}
-                  onChange={handleChange}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="请输入职位"
-                />
               </div>
             </div>
             
@@ -254,81 +201,39 @@ export default function AddCustomerPage() {
               </div>
             </div>
             
-            {/* 微信号 - 新增字段 */}
+            {/* Telegram账号 */}
             <div>
-              <label htmlFor="wechatId" className="block text-sm font-medium text-gray-700">
-                微信号
+              <label htmlFor="telegramId" className="block text-sm font-medium text-gray-700">
+                Telegram账号
               </label>
               <div className="mt-1">
                 <input
                   type="text"
-                  id="wechatId"
-                  name="wechatId"
-                  value={formData.wechatId}
+                  id="telegramId"
+                  name="telegramId"
+                  value={formData.telegramId}
                   onChange={handleChange}
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="请输入微信号"
+                  placeholder="请输入Telegram账号"
                 />
               </div>
             </div>
             
-            {/* QQ号 - 新增字段 */}
+            {/* WhatsApp账号 */}
             <div>
-              <label htmlFor="qqId" className="block text-sm font-medium text-gray-700">
-                QQ号
+              <label htmlFor="whatsappId" className="block text-sm font-medium text-gray-700">
+                WhatsApp账号
               </label>
               <div className="mt-1">
                 <input
                   type="text"
-                  id="qqId"
-                  name="qqId"
-                  value={formData.qqId}
+                  id="whatsappId"
+                  name="whatsappId"
+                  value={formData.whatsappId}
                   onChange={handleChange}
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="请输入QQ号"
+                  placeholder="请输入WhatsApp账号"
                 />
-              </div>
-            </div>
-            
-            {/* 邮箱 */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                邮箱
-              </label>
-              <div className="mt-1">
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`block w-full rounded-md shadow-sm ${
-                    errors.email ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
-                  } sm:text-sm`}
-                  placeholder="请输入邮箱地址"
-                />
-                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
-              </div>
-            </div>
-            
-            {/* 客户状态 */}
-            <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                客户状态
-              </label>
-              <div className="mt-1">
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                >
-                  <option value="potential">潜在客户</option>
-                  <option value="active">跟进中</option>
-                  <option value="signed">已签约</option>
-                  <option value="inactive">流失客户</option>
-                </select>
               </div>
             </div>
             
@@ -350,10 +255,29 @@ export default function AddCustomerPage() {
               </div>
             </div>
             
+            {/* 客户状态 */}
+            <div>
+              <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                客户状态
+              </label>
+              <div className="mt-1">
+                <select
+                  id="status"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                  <option value="undeveloped">未开发</option>
+                  <option value="followed">已跟进</option>
+                </select>
+              </div>
+            </div>
+            
             {/* 备注 */}
             <div>
               <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-                备注
+                客户备注
               </label>
               <div className="mt-1">
                 <textarea
