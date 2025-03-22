@@ -22,7 +22,13 @@
     
     /* Type Checking */
     "noImplicitAny": false,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    
+    /* Paths */
+    "baseUrl": ".",
+    "paths": {
+      "react-router-dom": ["./node_modules/react-router-dom"]
+    }
   },
   "include": ["src", "src/**/*.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
