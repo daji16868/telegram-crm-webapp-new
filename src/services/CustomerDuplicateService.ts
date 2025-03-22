@@ -7,9 +7,14 @@ export interface CustomerInfo {
   phone?: string;
   wechatId?: string;
   qqId?: string;
+  telegramId?: string; // 添加Telegram ID字段
+  whatsappId?: string; // 添加WhatsApp ID字段
   email?: string;
   company?: string;
   position?: string;
+  source?: string; // 添加客户来源字段
+  notes?: string; // 添加客户备注字段
+  status?: 'followed' | 'undeveloped'; // 添加客户状态字段
   addedBy?: string;
   addedAt?: string;
   tags?: string[];
@@ -23,6 +28,8 @@ export interface MatchResult {
     phone: boolean;
     wechatId: boolean;
     qqId: boolean;
+    telegramId: boolean; // 添加Telegram ID匹配
+    whatsappId: boolean; // 添加WhatsApp ID匹配
     email: boolean;
   };
   existingCustomer?: CustomerInfo;
@@ -36,9 +43,14 @@ const mockCustomers: CustomerInfo[] = [
     phone: '13812345678',
     wechatId: 'li123',
     qqId: '12345678',
+    telegramId: '@li_customer',
+    whatsappId: '+8613812345678',
     email: 'li@example.com',
     company: '集团A',
     position: '经理',
+    source: '展会推荐',
+    notes: '对我们的产品很感兴趣',
+    status: 'followed',
     addedBy: '张经理',
     addedAt: '2023-06-14',
     tags: ['集团A', '项目B', '小组C']
@@ -49,9 +61,14 @@ const mockCustomers: CustomerInfo[] = [
     phone: '13987654321',
     wechatId: 'wang456',
     qqId: '87654321',
+    telegramId: '@wang_customer',
+    whatsappId: '+8613987654321',
     email: 'wang@example.com',
     company: '集团B',
     position: '总监',
+    source: '朋友介绍',
+    notes: '需要详细了解产品功能',
+    status: 'undeveloped',
     addedBy: '李经理',
     addedAt: '2023-05-20',
     tags: ['集团B', '项目A']
@@ -62,9 +79,14 @@ const mockCustomers: CustomerInfo[] = [
     phone: '13765432198',
     wechatId: 'zhang789',
     qqId: '56781234',
+    telegramId: '@zhang_customer',
+    whatsappId: '+8613765432198',
     email: 'zhang@example.com',
     company: '集团C',
     position: '董事',
+    source: '官网咨询',
+    notes: '有合作意向',
+    status: 'followed',
     addedBy: '王总监',
     addedAt: '2023-04-15',
     tags: ['集团C', '项目C']
@@ -88,6 +110,8 @@ export const checkDuplicate = async (customer: CustomerInfo): Promise<MatchResul
       phone: false,
       wechatId: false,
       qqId: false,
+      telegramId: false,
+      whatsappId: false,
       email: false
     }
   };
@@ -117,6 +141,18 @@ export const checkDuplicate = async (customer: CustomerInfo): Promise<MatchResul
     // 检查QQ号是否匹配
     if (customer.qqId && existingCustomer.qqId && customer.qqId === existingCustomer.qqId) {
       matchResult.matchDetails.qqId = true;
+      hasMatch = true;
+    }
+    
+    // 检查Telegram ID是否匹配
+    if (customer.telegramId && existingCustomer.telegramId && customer.telegramId === existingCustomer.telegramId) {
+      matchResult.matchDetails.telegramId = true;
+      hasMatch = true;
+    }
+    
+    // 检查WhatsApp ID是否匹配
+    if (customer.whatsappId && existingCustomer.whatsappId && customer.whatsappId === existingCustomer.whatsappId) {
+      matchResult.matchDetails.whatsappId = true;
       hasMatch = true;
     }
     
