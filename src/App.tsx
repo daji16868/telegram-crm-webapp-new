@@ -11,6 +11,9 @@ import PendingApprovalPage from './pages/auth/PendingApprovalPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import CustomersPage from './pages/customers/CustomersPage';
 import AddCustomerPage from './pages/customers/AddCustomerPage';
+import OrganizationPage from './pages/organization/OrganizationPage';
+import TasksPage from './pages/tasks/TasksPage';
+import SettingsPage from './pages/settings/SettingsPage';
 
 function App() {
   // 初始化 Telegram WebApp
@@ -22,9 +25,9 @@ function App() {
     <Router>
       <Routes>
         {/* 身份验证路由 */}
-        <Route path="/auth/login" element={<LoginPage />} />
-        <Route path="/auth/register" element={<RegisterPage />} />
-        <Route path="/auth/pending-approval" element={<PendingApprovalPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/pending-approval" element={<PendingApprovalPage />} />
         
         {/* 主要功能路由 */}
         <Route path="/dashboard" element={<DashboardPage />} />
@@ -34,18 +37,18 @@ function App() {
         {/* 客户详情页面（待实现） */}
         <Route path="/customers/:id" element={<div className="p-4">客户详情页面（待实现）</div>} />
         
-        {/* 任务页面（待实现） */}
-        <Route path="/tasks" element={<div className="p-4">任务页面（待实现）</div>} />
+        {/* 任务页面 */}
+        <Route path="/tasks" element={<TasksPage />} />
         <Route path="/tasks/follow-ups" element={<div className="p-4">待跟进任务（待实现）</div>} />
         
-        {/* 组织页面（待实现） */}
-        <Route path="/organization" element={<div className="p-4">组织架构页面（待实现）</div>} />
+        {/* 组织页面 */}
+        <Route path="/organization" element={<OrganizationPage />} />
         
-        {/* 设置页面（待实现） */}
-        <Route path="/settings" element={<div className="p-4">设置页面（待实现）</div>} />
+        {/* 设置页面 */}
+        <Route path="/settings" element={<SettingsPage />} />
         
         {/* 重定向首页到登录页面或者仪表盘 */}
-        <Route path="/" element={<Navigate to="/auth/login" replace />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         
         {/* 404页面 */}
         <Route path="*" element={<div className="p-4 text-center">页面不存在</div>} />
