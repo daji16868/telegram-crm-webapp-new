@@ -14,6 +14,7 @@ import AddCustomerPage from './pages/customers/AddCustomerPage';
 import OrganizationPage from './pages/organization/OrganizationPage';
 import TasksPage from './pages/tasks/TasksPage';
 import SettingsPage from './pages/settings/SettingsPage';
+import NotificationsPage from './pages/notifications/NotificationsPage';
 
 function App() {
   // 初始化 Telegram WebApp
@@ -43,6 +44,9 @@ function App() {
         
         {/* 组织页面 */}
         <Route path="/organization" element={<OrganizationPage />} />
+        
+        {/* 通知页面 */}
+        <Route path="/notifications" element={<NotificationsPage />} />
         
         {/* 设置页面 */}
         <Route path="/settings" element={<SettingsPage />} />
