@@ -585,12 +585,12 @@ export default function SettingsPage() {
                     </div>
                     
                     <div>
-                      <label htmlFor="whatsappId" className="block text-sm font-medium text-gray-700">WhatsApp</label>
+                      <label htmlFor="telegramId" className="block text-sm font-medium text-gray-700">Telegram</label>
                       <input
                         type="text"
-                        id="whatsappId"
-                        name="whatsappId"
-                        value={editedProfile?.whatsappId || ''}
+                        id="telegramId"
+                        name="telegramId"
+                        value={editedProfile?.telegramId || ''}
                         onChange={handleProfileChange}
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       />
