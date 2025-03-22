@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { expandWebApp } from '../../utils/telegramWebApp';
+import { CustomerInfo, MatchResult, checkDuplicate, addCustomer } from '../../services/CustomerDuplicateService';
+import { DuplicateCustomerWarning } from '../../components/DuplicateCustomerWarning';
 
 // 客户表单接口
 interface CustomerFormData {
@@ -10,6 +12,8 @@ interface CustomerFormData {
   company: string;
   position: string;
   phone: string;
+  wechatId: string; // 添加微信号字段
+  qqId: string; // 添加QQ号字段
   email: string;
   status: 'potential' | 'active' | 'signed' | 'inactive';
   source: string;
@@ -23,6 +27,8 @@ export default function AddCustomerPage() {
     company: '',
     position: '',
     phone: '',
+    wechatId: '', // 初始化微信号
+    qqId: '', // 初始化QQ号
     email: '',
     status: 'potential',
     source: '',
@@ -30,6 +36,10 @@ export default function AddCustomerPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 重复客户检查状态
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [duplicateMatchResult, setDuplicateMatchResult] = useState<MatchResult | null>(null);
 
   // 页面加载时展开 Telegram WebApp
   useEffect(() => {
@@ -65,11 +75,11 @@ export default function AddCustomerPage() {
     
     if (!formData.phone.trim()) {
       newErrors.phone = '电话不能为空';
-    } else if (!/^\d{7,15}$/.test(formData.phone.replace(/[-\s]/g, ''))) {
+    } else if (!/^\\d{7,15}$/.test(formData.phone.replace(/[-\\s]/g, ''))) {
       newErrors.phone = '请输入有效的电话号码';
     }
     
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
+    if (formData.email && !/\\S+@\\S+\\.\\S+/.test(formData.email)) {
       newErrors.email = '请输入有效的邮箱地址';
     }
     
@@ -84,11 +94,32 @@ export default function AddCustomerPage() {
       setIsSubmitting(true);
       
       try {
-        // 模拟API请求
-        console.log('提交客户数据:', formData);
+        // 转换为CustomerInfo格式
+        const customerInfo: CustomerInfo = {
+          name: formData.name,
+          phone: formData.phone,
+          wechatId: formData.wechatId,
+          qqId: formData.qqId,
+          email: formData.email,
+          company: formData.company,
+          position: formData.position,
+          addedBy: '当前用户', // 在实际应用中，这应该是从用户上下文获取
+          tags: []
+        };
         
-        // 模拟网络延迟
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // 检查是否有重复客户
+        const result = await checkDuplicate(customerInfo);
+        
+        if (result.isMatch) {
+          // 如果发现重复客户，显示警告
+          setDuplicateMatchResult(result);
+          setShowDuplicateWarning(true);
+          setIsSubmitting(false);
+          return;
+        }
+        
+        // 没有重复，添加客户
+        await addCustomer(customerInfo);
         
         // 成功后返回客户列表页面
         navigate('/customers');
@@ -104,6 +135,22 @@ export default function AddCustomerPage() {
   const handleCancel = () => {
     navigate('/customers');
   };
+  
+  // 处理从重复警告页面返回
+  const handleBackFromWarning = () => {
+    setShowDuplicateWarning(false);
+    setDuplicateMatchResult(null);
+  };
+  
+  // 如果显示重复警告，则渲染警告组件
+  if (showDuplicateWarning && duplicateMatchResult) {
+    return (
+      <DuplicateCustomerWarning 
+        matchResult={duplicateMatchResult} 
+        onBack={handleBackFromWarning} 
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-6">
@@ -204,6 +251,42 @@ export default function AddCustomerPage() {
                   placeholder="请输入电话号码"
                 />
                 {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
+              </div>
+            </div>
+            
+            {/* 微信号 - 新增字段 */}
+            <div>
+              <label htmlFor="wechatId" className="block text-sm font-medium text-gray-700">
+                微信号
+              </label>
+              <div className="mt-1">
+                <input
+                  type="text"
+                  id="wechatId"
+                  name="wechatId"
+                  value={formData.wechatId}
+                  onChange={handleChange}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="请输入微信号"
+                />
+              </div>
+            </div>
+            
+            {/* QQ号 - 新增字段 */}
+            <div>
+              <label htmlFor="qqId" className="block text-sm font-medium text-gray-700">
+                QQ号
+              </label>
+              <div className="mt-1">
+                <input
+                  type="text"
+                  id="qqId"
+                  name="qqId"
+                  value={formData.qqId}
+                  onChange={handleChange}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="请输入QQ号"
+                />
               </div>
             </div>
             
