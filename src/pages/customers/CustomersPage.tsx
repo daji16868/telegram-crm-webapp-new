@@ -13,8 +13,12 @@ const MOCK_CUSTOMERS = [
     company: '北京科技有限公司', 
     position: '采购经理',
     phone: '13812345678',
+    telegramId: 'wang_xiaoming',
+    whatsappId: '+8613812345678',
     email: 'xiaoming@example.com',
-    status: 'potential', // 潜在客户
+    status: 'undeveloped', // 未开发
+    source: '展会推荐',
+    notes: '对我们的产品很感兴趣',
     lastContact: '2023-03-18'
   },
   { 
@@ -23,8 +27,12 @@ const MOCK_CUSTOMERS = [
     company: '上海贸易有限公司', 
     position: '销售总监',
     phone: '13987654321',
+    telegramId: 'lina_sh',
+    whatsappId: '+8613987654321',
     email: 'lina@example.com',
-    status: 'active', // 跟进中
+    status: 'followed', // 已跟进
+    source: '朋友介绍',
+    notes: '已经进行过初步接洽',
     lastContact: '2023-03-20'
   },
   { 
@@ -33,8 +41,12 @@ const MOCK_CUSTOMERS = [
     company: '广州电子科技有限公司', 
     position: '技术总监',
     phone: '15812345678',
+    telegramId: 'zhang_wei',
+    whatsappId: '+8615812345678',
     email: 'zhangwei@example.com',
-    status: 'inactive', // 流失客户
+    status: 'undeveloped', // 未开发
+    source: '官网咨询',
+    notes: '还没有正式跟进',
     lastContact: '2023-02-15'
   },
   { 
@@ -43,8 +55,12 @@ const MOCK_CUSTOMERS = [
     company: '深圳网络科技有限公司', 
     position: '市场经理',
     phone: '13612345678',
+    telegramId: 'liu_fang',
+    whatsappId: '+8613612345678',
     email: 'liufang@example.com',
-    status: 'active', // 跟进中
+    status: 'followed', // 已跟进
+    source: '社交媒体',
+    notes: '有购买意向',
     lastContact: '2023-03-21'
   },
   { 
@@ -53,26 +69,26 @@ const MOCK_CUSTOMERS = [
     company: '杭州软件有限公司', 
     position: '产品经理',
     phone: '13712345678',
+    telegramId: 'chen_xiao',
+    whatsappId: '+8613712345678',
     email: 'chenxiao@example.com',
-    status: 'signed', // 已签约
+    status: 'followed', // 已跟进
+    source: '老客户推荐',
+    notes: '已经达成初步合作意向',
     lastContact: '2023-03-19'
   }
 ];
 
 // 客户状态标签颜色
 const STATUS_COLORS: Record<string, string> = {
-  potential: 'bg-yellow-100 text-yellow-800', // 潜在客户
-  active: 'bg-blue-100 text-blue-800',       // 跟进中
-  signed: 'bg-green-100 text-green-800',     // 已签约
-  inactive: 'bg-gray-100 text-gray-800'      // 流失客户
+  undeveloped: 'bg-yellow-100 text-yellow-800', // 未开发
+  followed: 'bg-green-100 text-green-800',     // 已跟进
 };
 
 // 客户状态名称
 const STATUS_NAMES: Record<string, string> = {
-  potential: '潜在客户',
-  active: '跟进中',
-  signed: '已签约',
-  inactive: '流失客户'
+  undeveloped: '未开发',
+  followed: '已跟进',
 };
 
 export default function CustomersPage() {
@@ -95,9 +111,11 @@ export default function CustomersPage() {
       // 搜索过滤
       const matchesSearch = 
         customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        customer.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (customer.company && customer.company.toLowerCase().includes(searchTerm.toLowerCase())) ||
         customer.phone.includes(searchTerm) ||
-        customer.email.toLowerCase().includes(searchTerm.toLowerCase());
+        (customer.email && customer.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (customer.telegramId && customer.telegramId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (customer.whatsappId && customer.whatsappId.toLowerCase().includes(searchTerm.toLowerCase()));
       
       // 状态过滤
       const matchesStatus = filterStatus === 'all' || customer.status === filterStatus;
@@ -113,7 +131,7 @@ export default function CustomersPage() {
           comparison = a.name.localeCompare(b.name);
           break;
         case 'company':
-          comparison = a.company.localeCompare(b.company);
+          comparison = (a.company || '').localeCompare(b.company || '');
           break;
         case 'lastContact':
           comparison = new Date(a.lastContact).getTime() - new Date(b.lastContact).getTime();
@@ -179,7 +197,7 @@ export default function CustomersPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="搜索客户名称、公司、电话或邮箱"
+              placeholder="搜索客户名称、电话或Telegram账号"
             />
           </div>
         </div>
@@ -197,36 +215,20 @@ export default function CustomersPage() {
                 全部
               </button>
               <button
-                onClick={() => setFilterStatus('potential')}
+                onClick={() => setFilterStatus('undeveloped')}
                 className={`text-xs px-3 py-1 rounded-full border ${
-                  filterStatus === 'potential' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'
+                  filterStatus === 'undeveloped' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'
                 }`}
               >
-                潜在客户
+                未开发
               </button>
               <button
-                onClick={() => setFilterStatus('active')}
+                onClick={() => setFilterStatus('followed')}
                 className={`text-xs px-3 py-1 rounded-full border ${
-                  filterStatus === 'active' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'
+                  filterStatus === 'followed' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'
                 }`}
               >
-                跟进中
-              </button>
-              <button
-                onClick={() => setFilterStatus('signed')}
-                className={`text-xs px-3 py-1 rounded-full border ${
-                  filterStatus === 'signed' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'
-                }`}
-              >
-                已签约
-              </button>
-              <button
-                onClick={() => setFilterStatus('inactive')}
-                className={`text-xs px-3 py-1 rounded-full border ${
-                  filterStatus === 'inactive' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300'
-                }`}
-              >
-                流失客户
+                已跟进
               </button>
             </div>
             
@@ -293,26 +295,28 @@ export default function CustomersPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="text-base font-medium text-gray-900">{customer.name}</h3>
-                    <p className="text-sm text-gray-500 mt-1">{customer.company}</p>
-                    <p className="text-sm text-gray-500">{customer.position}</p>
+                    {customer.company && <p className="text-sm text-gray-500 mt-1">{customer.company}</p>}
+                    {customer.position && <p className="text-sm text-gray-500">{customer.position}</p>}
                   </div>
                   <span className={`text-xs px-2 py-1 rounded-full ${STATUS_COLORS[customer.status]}`}>
                     {STATUS_NAMES[customer.status]}
                   </span>
                 </div>
-                <div className="flex mt-2 text-sm text-gray-500">
-                  <div className="flex items-center mr-4">
+                <div className="flex flex-wrap mt-2 text-sm text-gray-500">
+                  <div className="flex items-center mr-4 mb-1">
                     <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                     {customer.phone}
                   </div>
-                  <div className="flex items-center truncate">
-                    <svg className="w-4 h-4 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <span className="truncate">{customer.email}</span>
-                  </div>
+                  {customer.telegramId && (
+                    <div className="flex items-center mr-4 mb-1">
+                      <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                      </svg>
+                      {customer.telegramId}
+                    </div>
+                  )}
                 </div>
                 <div className="mt-2 text-xs text-gray-400">
                   最近联系: {new Date(customer.lastContact).toLocaleDateString('zh-CN')}
