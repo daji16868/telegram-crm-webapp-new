@@ -10,6 +10,7 @@ import PendingApprovalPage from './pages/auth/PendingApprovalPage';
 // 主要功能页面
 import DashboardPage from './pages/dashboard/DashboardPage';
 import CustomersPage from './pages/customers/CustomersPage';
+import AddCustomerPage from './pages/customers/AddCustomerPage';
 
 function App() {
   // 初始化 Telegram WebApp
@@ -28,9 +29,9 @@ function App() {
         {/* 主要功能路由 */}
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/customers" element={<CustomersPage />} />
+        <Route path="/customers/add" element={<AddCustomerPage />} />
         
-        {/* 添加客户和客户详情页面（待实现） */}
-        <Route path="/customers/add" element={<div className="p-4">添加客户页面（待实现）</div>} />
+        {/* 客户详情页面（待实现） */}
         <Route path="/customers/:id" element={<div className="p-4">客户详情页面（待实现）</div>} />
         
         {/* 任务页面（待实现） */}
