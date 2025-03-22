@@ -26,6 +26,8 @@ export const DuplicateCustomerWarning: React.FC<DuplicateCustomerWarningProps> =
       phone: '手机号码',
       wechatId: '微信号',
       qqId: 'QQ号',
+      telegramId: 'Telegram ID',
+      whatsappId: 'WhatsApp ID',
       email: '电子邮箱'
     };
     return displayNames[field] || field;
@@ -92,6 +94,34 @@ export const DuplicateCustomerWarning: React.FC<DuplicateCustomerWarningProps> =
                   </svg>
                 )}
                 <span className="ml-3 text-sm text-gray-700">微信号：{matchDetails.wechatId ? existingCustomer.wechatId : '不匹配'}</span>
+              </div>
+              
+              {/* Telegram ID */}
+              <div className="flex items-center">
+                {matchDetails.telegramId ? (
+                  <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+                <span className="ml-3 text-sm text-gray-700">Telegram ID：{matchDetails.telegramId ? existingCustomer.telegramId : '不匹配'}</span>
+              </div>
+              
+              {/* WhatsApp ID */}
+              <div className="flex items-center">
+                {matchDetails.whatsappId ? (
+                  <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+                <span className="ml-3 text-sm text-gray-700">WhatsApp ID：{matchDetails.whatsappId ? existingCustomer.whatsappId : '不匹配'}</span>
               </div>
               
               {/* 手机号码 */}
