@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface BottomNavigationProps {
@@ -8,76 +8,12 @@ interface BottomNavigationProps {
 }
 
 export const BottomNavigation: React.FC<BottomNavigationProps> = ({ currentPath }) => {
-  const navigate = useNavigate();
-  const [showAddOptions, setShowAddOptions] = useState(false);
-  
   const isActive = (path: string) => {
     return currentPath === path || currentPath.startsWith(path + '/');
-  };
-  
-  const handleAddClick = () => {
-    setShowAddOptions(!showAddOptions);
-  };
-  
-  const handleOptionClick = (path: string) => {
-    setShowAddOptions(false);
-    navigate(path);
   };
 
   return (
     <>
-      {/* 添加选项浮层 */}
-      {showAddOptions && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-20"
-          onClick={() => setShowAddOptions(false)}
-        >
-          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 w-64 bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="p-2">
-              <button
-                onClick={() => handleOptionClick('/customers/add')}
-                className="w-full text-left px-4 py-3 flex items-center hover:bg-gray-50 rounded-md"
-              >
-                <svg className="w-5 h-5 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                <span>添加客户</span>
-              </button>
-              
-              <button
-                onClick={() => handleOptionClick('/tasks/add')}
-                className="w-full text-left px-4 py-3 flex items-center hover:bg-gray-50 rounded-md"
-              >
-                <svg className="w-5 h-5 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-                <span>添加任务</span>
-              </button>
-              
-              <button
-                onClick={() => handleOptionClick('/notes/add')}
-                className="w-full text-left px-4 py-3 flex items-center hover:bg-gray-50 rounded-md"
-              >
-                <svg className="w-5 h-5 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                <span>添加笔记</span>
-              </button>
-              
-              <button
-                onClick={() => handleOptionClick('/organization/member/add')}
-                className="w-full text-left px-4 py-3 flex items-center hover:bg-gray-50 rounded-md"
-              >
-                <svg className="w-5 h-5 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                <span>添加成员</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      
       {/* 底部导航栏 */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-10">
         <div className="grid grid-cols-5 h-16">
@@ -125,28 +61,28 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({ currentPath 
             <span className="text-xs mt-1">客户</span>
           </Link>
 
-          {/* 中间的添加按钮 */}
-          <button
-            onClick={handleAddClick}
-            className="relative flex flex-col items-center justify-center focus:outline-none"
+          {/* 任务按钮 */}
+          <Link
+            to="/tasks"
+            className={`flex flex-col items-center justify-center ${
+              isActive('/tasks') ? 'text-blue-600' : 'text-gray-500'
+            }`}
           >
-            <div className="absolute -top-5 bg-blue-600 rounded-full p-3 shadow-lg">
-              <svg 
-                className="w-6 h-6 text-white" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6" 
-                />
-              </svg>
-            </div>
-            <span className="text-xs mt-8 text-gray-500">添加</span>
-          </button>
+            <svg 
+              className="w-6 h-6" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+              />
+            </svg>
+            <span className="text-xs mt-1">任务</span>
+          </Link>
 
           <Link
             to="/organization"
